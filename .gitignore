@@ -1,0 +1,32 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+runs/
+
+# Local datasets and generated split files often contain absolute paths.
+datasets/
+
+# Model weights and exported binaries.
+*.pt
+*.pth
+*.onnx
+*.engine
+*.mlpackage
+
+# Thesis/private/copyrighted reference material.
+Articles/
+documents/
+
+# Experiment caches and reports generated locally.
+wandb/
+mlruns/
+*.cache
+
+# OS/editor noise.
+.idea/
+.vscode/
