@@ -30,3 +30,9 @@ mlruns/
 # OS/editor noise.
 .idea/
 .vscode/
+
+# Local agent/editor state and unrelated local prototypes.
+.context-bridge/
+.v3code/
+compision-landing-responsive/
+package-lock.json
