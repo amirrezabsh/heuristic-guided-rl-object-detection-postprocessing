@@ -59,12 +59,19 @@ scripts/
   train_torchvision_continuous_postprocess_rl.py
   summarize_postprocess_rl.py
   add_heuristic_postprocess_metrics.py
+  prepare_sku110k.py
+  prepare_hardhat.py
+  train_yolo_detector.py
+  evaluate_frozen_postprocess_policies.py
+  run_final_new_dataset_benchmarks.sh
+  summarize_final_new_dataset_tests.py
 
 docs/
   method.md
   results.md
   datasets.md
   implementation_design.md
+  FINAL_TESTS.md
 
 tests/
   Unit tests for the earlier search/fine-tuning utilities
@@ -98,6 +105,24 @@ Expected local YAML examples:
 datasets/globalwheat_subsets/pilot.yaml
 datasets/globalwheat_subsets/full.yaml
 ```
+
+## Final Benchmark Workflow
+
+The held-out final evaluation uses SKU-110K and Hard Hat Workers. Start with
+the dataset preparation instructions in [docs/datasets.md](docs/datasets.md),
+then follow [FINAL_TESTS.md](FINAL_TESTS.md) exactly. The latter documents the
+fixed protocol, resumable training command, one-time final-test confirmation,
+and generated result artifacts.
+
+The workflow is implemented by:
+
+- `prepare_sku110k.py` and `prepare_hardhat.py` for deterministic YOLO-format
+  dataset preparation;
+- `train_yolo_detector.py` for resumable detector fine-tuning;
+- `evaluate_frozen_postprocess_policies.py` for immutable one-time test
+  evaluation; and
+- `run_final_new_dataset_benchmarks.sh` and
+  `summarize_final_new_dataset_tests.py` for orchestration and aggregation.
 
 ## Reproducing The Main Global Wheat Experiment
 
