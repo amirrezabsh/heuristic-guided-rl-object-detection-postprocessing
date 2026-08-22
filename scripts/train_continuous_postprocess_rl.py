@@ -527,7 +527,11 @@ def main() -> None:
     parser.add_argument("--model", default="runs/globalwheat_yolo_supervised/yolov8n_pilot_e20/weights/best.pt")
     parser.add_argument("--data", type=Path, default=Path("datasets/globalwheat_subsets/pilot.yaml"))
     parser.add_argument("--train-split", default="train")
-    parser.add_argument("--eval-split", default="test")
+    parser.add_argument(
+        "--eval-split",
+        default="val",
+        help="Validation split monitored during policy training. Keep this as val; use the frozen evaluator for test.",
+    )
     parser.add_argument("--train-limit", type=int, default=200)
     parser.add_argument("--eval-limit", type=int, default=200)
     parser.add_argument("--imgsz", type=int, default=416)
