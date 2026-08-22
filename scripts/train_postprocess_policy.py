@@ -18,7 +18,11 @@ if str(ROOT_DIR) not in sys.path:
 import numpy as np
 import torch
 import yaml
-from PIL import Image
+from PIL import Image, ImageFile
+
+# SKU110K contains a recoverable JPEG with a truncated final segment.  Keep the
+# image in the declared split instead of silently dropping it during inference.
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 @dataclass(frozen=True)
@@ -187,14 +191,24 @@ def cache_split_predictions(
     candidate_iou: float,
     candidate_max_det: int,
 ) -> list[ImageRecord]:
+    records: list[ImageRecord] = []
     if cache_path.exists():
-        return load_cached_records(cache_path)
+        records = load_cached_records(cache_path)
+        if len(records) > len(image_paths):
+            raise ValueError(
+                f"Prediction cache has {len(records)} records but only {len(image_paths)} images were requested: {cache_path}"
+            )
+        cached_paths = [record.image_path for record in records]
+        expected_prefix = [str(path) for path in image_paths[: len(records)]]
+        if cached_paths != expected_prefix:
+            raise ValueError(f"Prediction cache does not match the requested image split: {cache_path}")
+        if len(records) == len(image_paths):
+            return records
 
     from ultralytics import YOLO
 
     model = YOLO(model_path, task="detect")
-    records: list[ImageRecord] = []
-    for start in range(0, len(image_paths), batch):
+    for start in range(len(records), len(image_paths), batch):
         batch_paths = image_paths[start : start + batch]
         results = model.predict(
             source=[str(path) for path in batch_paths],
@@ -232,9 +246,11 @@ def cache_split_predictions(
                     pred_classes=pred_classes,
                 )
             )
+        # Persist every completed batch so an interrupted final evaluation can
+        # resume without running inference again for images already processed.
+        save_cached_records(cache_path, records)
         print(f"cached={len(records)}/{len(image_paths)} split={cache_path.stem}", flush=True)
 
-    save_cached_records(cache_path, records)
     return records
 
 
