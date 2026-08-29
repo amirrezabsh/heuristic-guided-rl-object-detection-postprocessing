@@ -79,6 +79,28 @@ scripts/train_layerwise_rl.py
 scripts/train_multiepisode_policy.py
 ```
 
+## Final Benchmark Orchestration
+
+The final SKU-110K and Hard Hat Workers workflow separates dataset preparation,
+training, and held-out evaluation so that test data cannot be used while
+selecting a detector or policy:
+
+- `prepare_sku110k.py` and `prepare_hardhat.py` create deterministic YOLO
+  datasets and split manifests.
+- `train_yolo_detector.py` fine-tunes a detector in resumable chunks, including
+  safeguards for Apple Silicon memory pressure.
+- `run_final_new_dataset_benchmarks.sh train` trains detectors and policies on
+  train/validation data only, and `status` checks readiness without evaluating
+  the test split.
+- `evaluate_frozen_postprocess_policies.py` records hashes for the detector,
+  policies, dataset YAML, and split list, then refuses a second completed final
+  evaluation.
+- `summarize_final_new_dataset_tests.py` combines the per-dataset outputs into
+  a thesis-ready comparison table and summary.
+
+See [FINAL_TESTS.md](../FINAL_TESTS.md) for the operational protocol and
+[datasets.md](datasets.md) for source-layout and preparation requirements.
+
 ## Design Lessons
 
 The final experiments showed:
